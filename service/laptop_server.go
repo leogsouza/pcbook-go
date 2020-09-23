@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"log"
-	"time"
 
 	"github.com/leogsouza/pcbook-go/pb"
 	"github.com/segmentio/ksuid"
@@ -40,7 +39,8 @@ func (server *LaptopServer) CreateLaptop(ctx context.Context, req *pb.CreateLapt
 		laptop.Id = id.String()
 	}
 
-	time.Sleep(6 * time.Second)
+	// used to simulate a slow request
+	// time.Sleep(6 * time.Second)
 
 	if ctx.Err() == context.Canceled {
 		log.Print("request is canceled")
@@ -77,6 +77,7 @@ func (server *LaptopServer) SearchLaptop(req *pb.SearchLaptopRequest, stream pb.
 	log.Printf("receive a search-laptop request with filter: %v", filter)
 
 	err := server.Store.Search(
+		stream.Context(),
 		filter,
 		func(laptop *pb.Laptop) error {
 			res := &pb.SearchLaptopResponse{Laptop: laptop}

@@ -1,8 +1,10 @@
 package service
 
 import (
+	"context"
 	"errors"
 	"fmt"
+	"log"
 	"sync"
 
 	"github.com/jinzhu/copier"
@@ -19,7 +21,7 @@ type LaptopStore interface {
 	// Find finds a laptop by ID
 	Find(id string) (*pb.Laptop, error)
 	// Search searches for laptops with filter, returns one by one via the found function
-	Search(filter *pb.Filter, found func(laptop *pb.Laptop) error) error
+	Search(ctx context.Context, filter *pb.Filter, found func(laptop *pb.Laptop) error) error
 }
 
 // InMemoryLaptopStore stores laptop in memory
@@ -67,11 +69,20 @@ func (store *InMemoryLaptopStore) Find(id string) (*pb.Laptop, error) {
 }
 
 // Search searches for laptops with filter, returns one by one via the found function
-func (store *InMemoryLaptopStore) Search(filter *pb.Filter, found func(laptop *pb.Laptop) error) error {
+func (store *InMemoryLaptopStore) Search(ctx context.Context, filter *pb.Filter, found func(laptop *pb.Laptop) error) error {
 	store.mutex.RLock()
 	defer store.mutex.RUnlock()
 
 	for _, laptop := range store.data {
+		// simulate heavy processing
+		//time.Sleep(time.Second)
+		//log.Print("checking laptop id: ", laptop.GetId())
+
+		if ctx.Err() == context.Canceled || ctx.Err() == context.DeadlineExceeded {
+			log.Print("context is canceled")
+			return errors.New("context is canceled")
+		}
+
 		if isQualified(filter, laptop) {
 			other, err := deepCopy(laptop)
 			if err != nil {
