@@ -3,8 +3,8 @@ package serializer
 import (
 	"testing"
 
+	"github.com/golang/protobuf/proto"
 	"github.com/leogsouza/pcbook-go/pb"
-	"google.golang.org/protobuf/proto"
 
 	"github.com/stretchr/testify/require"
 
